@@ -5,17 +5,44 @@
     <title>Matura-Wunschfächer</title>
 </head>
 <body>
-    <form action = "/subjectData" method = "post">
-        AMEC <input value="amec" type="checkbox"><br>
-        NWES <input value="nwes" type="checkbox"><br>
-        UFW <input value="ufw" type="checkbox"><br>
-        BET <input value="bet" type="checkbox"><br>
-        INFI <input value="infi" type="checkbox"><br>
-        OTHER <input value="other" type="checkbox"><br>
+    <form action = "/subjectData" method = "post" id="selection">
+        AMEC <input value="amec" name="amec" type="checkbox"><br>
+        NWES <input value="nwes" name="nwes" type="checkbox"><br>
+        UFW <input value="ufw" name="ufw" type="checkbox"><br>
+        BET <input value="bet" name="bet" type="checkbox"><br>
+        INFI <input value="infi" name="infi" type="checkbox"><br>
+        OTHER <input value="other" name="other" type="checkbox"><br>
         <input type="submit" name="submit" value="Submit" />
     </form>
 </body>
 <script>
+const inputs = document.getElementsByTagName("input");
+const maxChecked = 2;
+var checked = 0;
+
+for(var i = 0; i < inputs.length; i++){
+    if(inputs[i].type == "checkbox"){
+        inputs[i].addEventListener('change', (event) => {
+            if(event.currentTarget.checked){
+                if(checked >= maxChecked){
+                    alert("Max Reached");
+                    event.currentTarget.checked = false;
+                    return;
+                }
+                checked++;
+                return;
+            }
+            checked--;
+        })
+    }
+}
+
+document.getElementById("selection").addEventListener('submit', (event) =>{
+    if(checked < maxChecked){
+        event.preventDefault();
+        alert("Please Select " + maxChecked.toString() + "!")
+    }
+})
 
 </script>
 </html>

@@ -19,6 +19,7 @@ api = Api(app)
 app.secret_key = keys.secret_key
 key = keys.requestkey
 db = keys.db
+subjects = keys.subjects
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -41,11 +42,11 @@ class User(Base):
 
 
 def checkExisting(username, password):
-    return db_session.query(User).filter_by(USERNAME=username, PASSWORD=password).all()
+    return User.query.filter_by(USERNAME=username, PASSWORD=password).first()
 
 
 def checkLogin(username, password):
-    return db_session.query(User).filter_by(USERNAME=username, PASSWORD=password, SUBJECT1="", SUBJECT2="").all()
+    return User.query.filter_by(USERNAME=username, PASSWORD=password, SUBJECT1=None, SUBJECT2=None).first()
 
 
 def get_random_string(length):
@@ -60,7 +61,9 @@ def encrypt_string(hash_string):
 
 
 def updateUser(username, password, subject1, subject2):
-    user = User(USERNAME=username, PASSWORD=password, SUBJECT1=subject1, SUBJECT2=subject2)
+    user = User.query.filter_by(USERNAME=username, PASSWORD=password).first()
+    user.SUBJECT1 = subject1
+    user.SUBJECT2 = subject2
     db_session.add(user)
     db_session.flush()
 
@@ -84,24 +87,34 @@ def loginGet():
 def loginGetError(data):
     return render_template("login.html", data=data)
 
+@app.route('/graphics')
+def getGraphics():
+    return render_template("graphics.html")
+
 
 @app.route('/login', methods=["Post"])
 def loginPost():
     session["user"] = checkLogin(request.form.get("username"), encrypt_string(request.form.get("password")))
     if session["user"] is not None:
+        session["username"] = request.form.get("username")
+        session["password"] = encrypt_string(request.form.get("password"))
         session["login"] = True;
         return render_template("elections.html")
     user = checkExisting(request.form.get("username"), encrypt_string(request.form.get("password")))
     if user:
-        return render_template("graphics.html")
+        return getGraphics()
     return render_template("login.html", data="Wrong data")
 
 
 @app.route('/subjectData', methods=["Post"])
 def subjectData():
-    # TODO: get the data from form
-    updateUser()  # put data in there
-    pass
+    taken_subjects = []
+    for sub in subjects:
+        if request.form.get(sub):
+            taken_subjects.append(sub)
+    updateUser(session["username"], session["password"], taken_subjects[0], taken_subjects[1])
+    session.clear()
+    return getGraphics()
 
 
 class Data(Resource):
