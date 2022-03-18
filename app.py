@@ -46,7 +46,7 @@ def checkExisting(username, password):
 
 
 def checkLogin(username, password):
-    return User.query.filter_by(USERNAME=username, PASSWORD=password, SUBJECT1=None, SUBJECT2=None).first()
+    return User.query.filter_by(USERNAME=username, PASSWORD=password, SUBJECT1="", SUBJECT2="").first()
 
 
 def get_random_string(length):
@@ -95,7 +95,7 @@ def getGraphics():
 @app.route('/login', methods=["Post"])
 def loginPost():
     session["user"] = checkLogin(request.form.get("username"), encrypt_string(request.form.get("password")))
-    if session["user"] is not None:
+    if session["user"]:
         session["username"] = request.form.get("username")
         session["password"] = encrypt_string(request.form.get("password"))
         session["login"] = True;
@@ -127,11 +127,15 @@ class Data(Resource):
     def put(self):
         print(request.form["users"])
         if request.form["key"] == key:
+            with open(filename, "r+") as f:
+                f.truncate(0)
+            db_session.query(User).delete()
             for username in json.loads(request.form["users"]):
                 password = get_random_string(10)
                 with open(filename, "a") as f:
                     f.write("Username %s - Password %s \n" % (username, password))
-                updateUser(USERNAME=username, PASSWORD=encrypt_string(password), SUBJECT1="", SUBJECT2="")
+                db_session.add(User(USERNAME=username, PASSWORD=encrypt_string(password), SUBJECT1="", SUBJECT2=""))
+                db_session.flush()
             return jsonify({"message": "all users successfully stored!"})
         return jsonify({"message": "you are not allowed to create new users!"})
 
