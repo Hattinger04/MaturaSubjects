@@ -3,7 +3,7 @@ It's a project in my freetime for my A-Levels for all students in my class to ch
 ## Setup Website
 - downlaod project
 - download all needed library's from requirements
-- create key.py file in root folder and add following variables:
+- create keys.py file in root folder and add following variables:
     - requestkey [String] (key for admins to create new users in database)
     - host [String] (ip address)
     - userlist [list] (all usernames you want to put into database)
