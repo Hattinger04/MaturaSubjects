@@ -155,9 +155,6 @@ def subjectData():
         if request.form.get(sub):
             taken_subjects.append(sub)
     updateUser(session["username"], session["password"], taken_subjects[0], taken_subjects[1])
-    session["login"] = ""
-    session["username"] = ""
-    session["password"] = ""
     return getGraphics()
 
 
