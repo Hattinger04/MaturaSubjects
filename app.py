@@ -89,8 +89,10 @@ def count_voted_users():
 
 def count_user_votes():
     votes = {}
-    if session["login"]:
-        # TODO: get subject1 and subject2 from user and safe to votes
+    if session["login"] and session["username"] != "" and session["password"] != "":
+        user = checkExisting(session["username"], session["password"])
+        votes["subject1"] = user.SUBJECT1
+        votes["subject2"] = user.SUBJECT2
         return votes
     votes["error"] = "Not logged in!"
     return votes
@@ -139,6 +141,9 @@ def loginPost():
         return render_template("elections.html")
     user = checkExisting(request.form.get("username"), encrypt_string(request.form.get("password")))
     if user:
+        session["username"] = request.form.get("username")
+        session["password"] = encrypt_string(request.form.get("password"))
+        session["login"] = True
         return getGraphics()
     return render_template("login.html", data="Wrong data")
 
@@ -150,7 +155,9 @@ def subjectData():
         if request.form.get(sub):
             taken_subjects.append(sub)
     updateUser(session["username"], session["password"], taken_subjects[0], taken_subjects[1])
-    session.clear()
+    session["login"] = ""
+    session["username"] = ""
+    session["password"] = ""
     return getGraphics()
 
 

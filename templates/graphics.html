@@ -16,7 +16,13 @@
 <p>How many users still have to vote? {{allvotes["!voted_users"]}}</p>
 
 <br>
-
+{% if uservotes["error"] %}
+    <p>Not logged in!</p>
+{% else %}
+    <p>You voted: </p>
+    <p>{{uservotes["subject1"]}}</p>
+    <p>{{uservotes["subject2"]}}</p>
+{% endif %}
 <a href="/logout"><button>Logout</button></a>
 </body>
 </html>
