@@ -55,9 +55,7 @@ def get_random_string(length):
 
 
 def encrypt_string(hash_string):
-    sha_signature = \
-        hashlib.sha256(hash_string.encode()).hexdigest()
-    return sha_signature
+    return hashlib.sha256(hash_string.encode()).hexdigest()
 
 
 def updateUser(username, password, subject1, subject2):
@@ -82,14 +80,18 @@ def home():
 def loginGet():
     return render_template("login.html")
 
-
 @app.route('/login')
 def loginGetError(data):
     return render_template("login.html", data=data)
 
-@app.route('/graphics')
+@app.route('/graphics', methods=["Get"])
 def getGraphics():
     return render_template("graphics.html")
+
+@app.route('/logout', methods=["Get"])
+def logout():
+    session.clear()
+    return render_template("login.html")
 
 
 @app.route('/login', methods=["Post"])
@@ -98,7 +100,7 @@ def loginPost():
     if session["user"]:
         session["username"] = request.form.get("username")
         session["password"] = encrypt_string(request.form.get("password"))
-        session["login"] = True;
+        session["login"] = True
         return render_template("elections.html")
     user = checkExisting(request.form.get("username"), encrypt_string(request.form.get("password")))
     if user:
