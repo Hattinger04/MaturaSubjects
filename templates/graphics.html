@@ -5,7 +5,18 @@
     <title>Grafische Darstellung</title>
 </head>
 <body>
-Alle Votes im Überblick: <br><br>
+<h1>Votes:</h1>
+
+{% for key, value in votes.items() %}
+    <p>Subject: {{key}} - Votes: {{value}}</p>
+{% endfor %}
+
+<p>How many users have to vote? {{allvotes["all_users"]}}</p>
+<p>How many users have already voted? {{allvotes["voted_users"]}}</p>
+<p>How many users still have to vote? {{allvotes["!voted_users"]}}</p>
+
+<br>
+
 <a href="/logout"><button>Logout</button></a>
 </body>
 </html>

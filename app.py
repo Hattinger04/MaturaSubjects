@@ -9,6 +9,7 @@ import random
 import hashlib
 import keys
 
+from sqlalchemy.sql import text
 from sqlalchemy import Column, Integer, Text, create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -29,6 +30,7 @@ Base.query = db_session.query_property()
 from dataclasses import dataclass
 
 filename = "users.txt"
+
 
 @dataclass
 class User(Base):
@@ -66,6 +68,33 @@ def updateUser(username, password, subject1, subject2):
     db_session.flush()
 
 
+def count_votes():
+    with engine.connect() as con:
+        data = []
+        count = {}
+        for s in subjects:
+            data.append({"subject1": s, "subject2": s})
+            count[s] = ""
+        statement = text("""select count(*) from User where SUBJECT1=:subject1 or SUBJECT2=:subject2 """)
+        for line in data:
+            count[line["subject1"]] = con.execute(statement, **line).first()[0]
+        return count
+
+def count_voted_users():
+    users = {}
+    users["all_users"] = db_session.query(User).count()
+    users["!voted_users"] = User.query.filter(User.SUBJECT1=="").count()
+    users["voted_users"] = int(users["all_users"]) - int(users["!voted_users"])
+    return users
+
+def count_user_votes():
+    votes = {}
+    if session["login"]:
+        # TODO: get subject1 and subject2 from user and safe to votes
+        return votes
+    votes["error"] = "Not logged in!"
+    return votes
+
 @app.route('/')
 def home():
     try:
@@ -80,13 +109,19 @@ def home():
 def loginGet():
     return render_template("login.html")
 
+
 @app.route('/login')
 def loginGetError(data):
     return render_template("login.html", data=data)
 
+
 @app.route('/graphics', methods=["Get"])
 def getGraphics():
-    return render_template("graphics.html")
+    votes = count_votes()
+    allvotes = count_voted_users()
+    uservotes = count_user_votes()
+    return render_template("graphics.html", votes=votes, allvotes=allvotes, uservotes=uservotes)
+
 
 @app.route('/logout', methods=["Get"])
 def logout():
